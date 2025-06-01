@@ -3,16 +3,16 @@ package com.spring.www.ms_empresas.controller;
 import com.spring.www.ms_empresas.entity.Empresa;
 import com.spring.www.ms_empresas.exceptions.HandlerApiException;
 import com.spring.www.ms_empresas.service.EmpresaServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/empresas")
@@ -24,6 +24,11 @@ public class EmpresasController {
         this.service = service;
     }
 
+    /*
+      - Este tipo de paginacion es para las pruebas en postman
+      - no valido para produccion
+
+     */
     @GetMapping("listar/empresas")
     public ResponseEntity<?> listarEmpresas (@RequestParam (defaultValue = "0") int page, @RequestParam (defaultValue = "10" ) int size){
         List<Empresa> listaEmpresas = service.listarEmpresas();
@@ -48,5 +53,89 @@ public class EmpresasController {
         return ResponseEntity.ok(response); // 201
 
     } //
+
+
+    /*
+      - end point para buscar una empresa por id
+     */
+
+    @GetMapping("buscar/{id}")
+    public ResponseEntity<?> buscarEmpresaPorId (@PathVariable Long id){
+        Optional<Empresa> empresaId = service.buscarEmpresaPorId(id);
+        if (empresaId.isEmpty()){
+            return HandlerApiException.not_found("no se encontro ninguna empresa con ese id: "+ id); // error http 404
+        } else {
+            return ResponseEntity.ok(empresaId); // exito 200 ok
+        }
+    } //
+
+
+    /*
+     - end point para crear una empresa
+     */
+
+    @PostMapping("/crear/empresa")
+    private ResponseEntity<?> nuevaEmpresa (@Valid @RequestBody Empresa empresa, BindingResult result){
+        if (result.hasErrors()){
+            Map<String, Object> errors = new HashMap<>();
+            result.getFieldErrors().forEach( e -> {
+                errors.put(e.getField(), "El campo "+e.getDefaultMessage());
+            });
+            return ResponseEntity.ok(empresa); // 200 ok
+        }
+        try {
+            Empresa newEmpresa = service.crearEmpresa(empresa);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newEmpresa); // 201 created
+
+        } catch (IllegalArgumentException e){
+            return HandlerApiException.bad_request("no se pudo crear la empresa"); // 400 bad request
+        }
+    }
+
+    /*
+     - end point para editar empresas
+     */
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<?> editarEmpresas(@Valid @RequestBody Empresa empresa, BindingResult result, @PathVariable Long id){
+        if (result.hasErrors()){
+            Map<String, Object> errors = new HashMap<>();
+            result.getFieldErrors().forEach( e -> {
+                errors.put(e.getField(), "El campo "+e.getDefaultMessage());
+            });
+            return ResponseEntity.ok(errors);
+        }
+        try {
+            Optional<Empresa> empresaId = service.buscarEmpresaPorId(id);
+            if (empresaId.isPresent()){
+                Empresa empresaUpdate = empresaId.get();
+                empresaUpdate.setNombre(empresa.getNombre());
+                empresaUpdate.setIndustria(empresa.getIndustria());
+
+                Empresa empresaDB = service.crearEmpresa(empresaUpdate);
+                return ResponseEntity.status(HttpStatus.CREATED).body(empresaDB);
+            } else {
+                return HandlerApiException.not_found("no se pudo editar la empresa");
+            }
+        } catch (IllegalArgumentException ex){
+            return HandlerApiException.bad_request("no se pudo editar");
+        }
+    }//
+
+    @DeleteMapping("/borrar/{id}")
+    public ResponseEntity<?> eliminarEmpresa (@PathVariable Long id) {
+        Optional<Empresa> eliminarEmpresa = service.buscarEmpresaPorId(id);
+        try {
+            if (eliminarEmpresa.isPresent()){
+                service.eliminarEmpresa(id);
+                return ResponseEntity.status(HttpStatus.OK).body(Map.of(
+                        "message", "empresas eliminado con exito"
+                ));
+            } else {
+                return HandlerApiException.not_found("no se pudo borrar la empresa");
+            }
+        } catch (IllegalArgumentException e){
+            return HandlerApiException.bad_request("no se pudo borrar ña empresa");
+        }
+    }//
 
 } //
