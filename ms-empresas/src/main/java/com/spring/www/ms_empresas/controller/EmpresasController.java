@@ -71,7 +71,7 @@ public class EmpresasController {
 
 
     /*
-     - end point para crear una empresa
+     - end point para crear una empresa nueva
      */
 
     @PostMapping("/crear/empresa")
@@ -93,7 +93,7 @@ public class EmpresasController {
     }
 
     /*
-     - end point para editar empresas
+     - end point para editar empresas ya existentes
      */
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> editarEmpresas(@Valid @RequestBody Empresa empresa, BindingResult result, @PathVariable Long id){
@@ -114,12 +114,16 @@ public class EmpresasController {
                 Empresa empresaDB = service.crearEmpresa(empresaUpdate);
                 return ResponseEntity.status(HttpStatus.CREATED).body(empresaDB);
             } else {
-                return HandlerApiException.not_found("no se pudo editar la empresa");
+                return HandlerApiException.not_found("no se pudo editar la empresa"); // 404 not found
             }
         } catch (IllegalArgumentException ex){
-            return HandlerApiException.bad_request("no se pudo editar");
+            return HandlerApiException.bad_request("no se pudo editar"); // 400 not found
         }
     }//
+
+    /*
+     - end point para eliminar una empresa
+     */
 
     @DeleteMapping("/borrar/{id}")
     public ResponseEntity<?> eliminarEmpresa (@PathVariable Long id) {
@@ -134,7 +138,7 @@ public class EmpresasController {
                 return HandlerApiException.not_found("no se pudo borrar la empresa");
             }
         } catch (IllegalArgumentException e){
-            return HandlerApiException.bad_request("no se pudo borrar ña empresa");
+            return HandlerApiException.bad_request("no se pudo borrar la empresa");
         }
     }//
 
