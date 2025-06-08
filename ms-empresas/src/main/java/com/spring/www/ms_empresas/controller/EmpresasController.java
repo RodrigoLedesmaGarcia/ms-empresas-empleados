@@ -30,16 +30,16 @@ public class EmpresasController {
 
      */
     @GetMapping("listar/empresas")
-    public ResponseEntity<?> listarEmpresas (@RequestParam (defaultValue = "0") int page, @RequestParam (defaultValue = "10" ) int size){
+    public ResponseEntity<?> listarEmpresas(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         List<Empresa> listaEmpresas = service.listarEmpresas();
 
-        if (listaEmpresas.isEmpty()){
+        if (listaEmpresas.isEmpty()) {
             return HandlerApiException.not_found("no se encontraron elementos para mostrar");
         }
 
         int start = page * size, end = Math.min(page + size, listaEmpresas.size());
 
-        if (start >= listaEmpresas.size()){
+        if (start >= listaEmpresas.size()) {
             return HandlerApiException.bad_request("la pagina selecionada no existe");
         }
 
@@ -49,7 +49,7 @@ public class EmpresasController {
         response.put("page", page);
         response.put("size", size);
         response.put("total", listaEmpresas.size());
-        response.put("totalPages", (int) Math.ceil( (double) listaEmpresas.size() / size));
+        response.put("totalPages", (int) Math.ceil((double) listaEmpresas.size() / size));
         return ResponseEntity.ok(response); // 201
 
     } //
@@ -60,10 +60,10 @@ public class EmpresasController {
      */
 
     @GetMapping("buscar/{id}")
-    public ResponseEntity<?> buscarEmpresaPorId (@PathVariable Long id){
+    public ResponseEntity<?> buscarEmpresaPorId(@PathVariable Long id) {
         Optional<Empresa> empresaId = service.buscarEmpresaPorId(id);
-        if (empresaId.isEmpty()){
-            return HandlerApiException.not_found("no se encontro ninguna empresa con ese id: "+ id); // error http 404
+        if (empresaId.isEmpty()) {
+            return HandlerApiException.not_found("no se encontro ninguna empresa con ese id: " + id); // error http 404
         } else {
             return ResponseEntity.ok(empresaId); // exito 200 ok
         }
@@ -75,50 +75,54 @@ public class EmpresasController {
      */
 
     @PostMapping("/crear/empresa")
-    private ResponseEntity<?> nuevaEmpresa (@Valid @RequestBody Empresa empresa, BindingResult result){
-        if (result.hasErrors()){
+    private ResponseEntity<?> nuevaEmpresa(@Valid @RequestBody Empresa empresa, BindingResult result) {
+        if (result.hasErrors()) {
             Map<String, Object> errors = new HashMap<>();
-            result.getFieldErrors().forEach( e -> {
-                errors.put(e.getField(), "El campo "+e.getDefaultMessage());
+            result.getFieldErrors().forEach(e -> {
+                errors.put(e.getField(), "El campo " + e.getDefaultMessage());
             });
-            return ResponseEntity.ok(empresa); // 200 ok
-        }
-        try {
-            Empresa newEmpresa = service.crearEmpresa(empresa);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newEmpresa); // 201 created
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors); // 400 nad request
+        } else {
+            try {
+                Empresa newEmpresa = service.crearEmpresa(empresa);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newEmpresa); // 201 created
 
-        } catch (IllegalArgumentException e){
-            return HandlerApiException.bad_request("no se pudo crear la empresa"); // 400 bad request
+            } catch (IllegalArgumentException e) {
+                return HandlerApiException.bad_request("no se pudo crear la empresa"); // 400 bad request
+            }
         }
+
     }
 
     /*
      - end point para editar empresas ya existentes
      */
     @PutMapping("/editar/{id}")
-    public ResponseEntity<?> editarEmpresas(@Valid @RequestBody Empresa empresa, BindingResult result, @PathVariable Long id){
-        if (result.hasErrors()){
+    public ResponseEntity<?> editarEmpresas(@Valid @RequestBody Empresa empresa, BindingResult result, @PathVariable Long id) {
+        if (result.hasErrors()) {
             Map<String, Object> errors = new HashMap<>();
-            result.getFieldErrors().forEach( e -> {
-                errors.put(e.getField(), "El campo "+e.getDefaultMessage());
+            result.getFieldErrors().forEach(e -> {
+                errors.put(e.getField(), "El campo " + e.getDefaultMessage());
             });
-            return ResponseEntity.ok(errors);
-        }
-        try {
-            Optional<Empresa> empresaId = service.buscarEmpresaPorId(id);
-            if (empresaId.isPresent()){
-                Empresa empresaUpdate = empresaId.get();
-                empresaUpdate.setNombre(empresa.getNombre());
-                empresaUpdate.setIndustria(empresa.getIndustria());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors); // 400 nad request
+        } else {
+            try {
+                Optional<Empresa> empresaId = service.buscarEmpresaPorId(id);
+                if (empresaId.isPresent()) {
+                    Empresa empresaUpdate = empresaId.get();
+                    empresaUpdate.setNombre(empresa.getNombre());
+                    empresaUpdate.setIndustria(empresa.getIndustria());
 
-                Empresa empresaDB = service.crearEmpresa(empresaUpdate);
-                return ResponseEntity.status(HttpStatus.CREATED).body(empresaDB);
-            } else {
-                return HandlerApiException.not_found("no se pudo editar la empresa"); // 404 not found
+                    Empresa empresaDB = service.crearEmpresa(empresaUpdate);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(empresaDB);
+                } else {
+                    return HandlerApiException.not_found("no se pudo editar la empresa"); // 404 not found
+                }
+            } catch (IllegalArgumentException ex) {
+                return HandlerApiException.bad_request("no se pudo editar"); // 400 not found
             }
-        } catch (IllegalArgumentException ex){
-            return HandlerApiException.bad_request("no se pudo editar"); // 400 not found
         }
+
     }//
 
     /*
@@ -126,10 +130,10 @@ public class EmpresasController {
      */
 
     @DeleteMapping("/borrar/{id}")
-    public ResponseEntity<?> eliminarEmpresa (@PathVariable Long id) {
+    public ResponseEntity<?> eliminarEmpresa(@PathVariable Long id) {
         Optional<Empresa> eliminarEmpresa = service.buscarEmpresaPorId(id);
         try {
-            if (eliminarEmpresa.isPresent()){
+            if (eliminarEmpresa.isPresent()) {
                 service.eliminarEmpresa(id);
                 return ResponseEntity.status(HttpStatus.OK).body(Map.of(
                         "message", "empresas eliminado con exito"
@@ -137,9 +141,9 @@ public class EmpresasController {
             } else {
                 return HandlerApiException.not_found("no se pudo borrar la empresa");
             }
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return HandlerApiException.bad_request("no se pudo borrar la empresa");
         }
     }//
 
-} //
+}//

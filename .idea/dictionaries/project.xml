@@ -2,10 +2,14 @@
   <dictionary name="project">
     <words>
       <w>configuracion</w>
+      <w>empleado</w>
+      <w>empleados</w>
       <w>empresa</w>
       <w>empresas</w>
       <w>encontro</w>
       <w>ninguna</w>
+      <w>paginados</w>
+      <w>puesto</w>
     </words>
   </dictionary>
 </component>

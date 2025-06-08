@@ -1,13 +1,8 @@
-
 spring:
   application:
-    name: ms-empresas
+    name: ms-empleados
   datasource:
-    # configuracion sin docker
     url: jdbc:mysql://localhost:3308/empresasDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-
-    # configuracion para docker
-    ##url: jdbc:mysql://host.docker.internal:3308/empresasDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: 12345
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,7 +11,7 @@ spring:
     generate-ddl: true
 
 server:
-  port: 9000
+  port: 9001
 
 logging:
   level:

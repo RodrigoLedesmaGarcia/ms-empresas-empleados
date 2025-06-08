@@ -6,13 +6,13 @@ spring:
     gateway:
       routes:
         - id: ms-empleados
-        # configuracion sin docker  #uri: http://localhost:9000
-          uri: http://host.docker.internal:9000
+          uri: http://localhost:9000
+         # uri: http://host.docker.internal:9000
           predicates:
             - Path=/api/empleados/**
         - id: ms-empresas
-        # configuracion sin docker  uri: http://localhost:9001
-          uri: http://host.docker.internal:9001
+          uri: http://localhost:9001
+        #  uri: http://host.docker.internal:9001
           predicates:
             - Path=/api/empresas/**
 
@@ -22,6 +22,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: "http://host.docker.internal:8761/eureka/"
+      #defaultZone: "http://host.docker.internal:8761/eureka/"
+      defaultZone: "http://localhost:8761/eureka/"
     registerWithEureka: true
     fetchRegistry: true
