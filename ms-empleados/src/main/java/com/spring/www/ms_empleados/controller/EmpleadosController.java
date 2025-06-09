@@ -32,6 +32,7 @@ public class EmpleadosController {
 
     /*
      - end point para listar a todas las empresas
+     http://localhost:9001/api/empleados/empleados-list
      */
     @GetMapping("/empleados-list")
     public Page<Empleado> listarEmpleadosPaginados(
@@ -79,6 +80,7 @@ public class EmpleadosController {
 
     /*
      - end pont para crear a un empleado
+     http://localhost:9001/api/empleados/crear/empleado
      */
     @PostMapping("crear/empleado")
     public ResponseEntity<?> crearEmpleado (@Valid @RequestBody Empleado empleado, BindingResult result) {
@@ -92,10 +94,10 @@ public class EmpleadosController {
         try {
             empleadoService.crearEmpleado(empleado);
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "error", "se creo el empleado exitosamente"
+                    "success : 201", "se creo el empleado exitosamente"
             ));
         } catch (IllegalArgumentException ex) {
-            return HandlerApiRequestException.badRequest("no se pudo crear al usuario");
+            return HandlerApiRequestException.badRequest("no se pudo crear al empleado");
         }
     } //
 

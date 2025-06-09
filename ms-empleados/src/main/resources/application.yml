@@ -2,7 +2,7 @@ spring:
   application:
     name: ms-empleados
   datasource:
-    url: jdbc:mysql://localhost:3308/empresasDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3308/empleadosDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: 12345
     driver-class-name: com.mysql.cj.jdbc.Driver
